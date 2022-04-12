@@ -26,6 +26,9 @@ namespace Service.AutoInvestManager.Settings
         [YamlProperty("AutoInvestManager.PostgresConnectionString")]
         public string PostgresConnectionString { get; set; }
         
+        [YamlProperty("AutoInvestManager.LiquidityConverterGrpcServiceUrl")]
+        public string LiquidityConverterGrpcServiceUrl { get; set; }
+        
         // [YamlProperty("AutoInvestManager.TimerPeriodInSeconds")]
         // public int TimerPeriodInSeconds { get; set; }
     }
