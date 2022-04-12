@@ -27,6 +27,8 @@ namespace Service.AutoInvestManager.Domain.Models
         [DataMember(Order = 13)]public DateTime CreationTime { get; set; }
         [DataMember(Order = 14)]public DateTime LastExecutionTime { get; set; }
         [DataMember(Order = 15)]public bool ShouldSendFailEmail { get; set; }
+        
+        [DataMember(Order = 16)]public string OriginalQuoteId { get; set; }
     }
     
 }

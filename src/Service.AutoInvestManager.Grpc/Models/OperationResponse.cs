@@ -11,5 +11,8 @@ namespace Service.AutoInvestManager.Grpc.Models
         
         [DataMember(Order = 2)]
         public string ErrorMessage { get; set; }
+        
+        [DataMember(Order = 3)]
+        public InvestInstruction Instruction { get; set; }
     }
 }

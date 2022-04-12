@@ -6,6 +6,8 @@ using Service.AutoInvestManager.Domain.Models;
 using Service.AutoInvestManager.Grpc;
 using Service.AutoInvestManager.Grpc.Models;
 using Service.AutoInvestManager.Helpers;
+using Service.Liquidity.Converter.Grpc;
+using Service.Liquidity.Converter.Grpc.Models;
 
 namespace Service.AutoInvestManager.Services
 {
@@ -13,43 +15,91 @@ namespace Service.AutoInvestManager.Services
     {
         private readonly ILogger<AutoInvestService> _logger;
         private readonly InstructionsRepository _repository;
+        private readonly IHistoryService _quoteHistoryService;
 
-        public AutoInvestService(ILogger<AutoInvestService> logger, InstructionsRepository repository)
+        public AutoInvestService(ILogger<AutoInvestService> logger, InstructionsRepository repository, IHistoryService quoteHistoryService)
         {
             _logger = logger;
             _repository = repository;
+            _quoteHistoryService = quoteHistoryService;
         }
 
+        private async Task<InvestInstruction> CreateInvestInstruction(CreateInstructionRequest request)
+        {
+            var quoteResponse = await _quoteHistoryService.GetQuoteById(new GetQuoteByIdRequest
+            {
+                QuoteId = request.QuoteId
+            });
+            if (!quoteResponse.Success)
+                throw new Exception("Quote not found");
+
+            return new InvestInstruction
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                ClientId = request.ClientId,
+                BrokerId = request.BrokerId,
+                WalletId = request.WalletId,
+                FromAmount = quoteResponse.Quote.FromAssetVolume,
+                FromAsset = quoteResponse.Quote.FromAsset,
+                ToAsset = quoteResponse.Quote.ToAsset,
+                Status = InstructionStatus.Active,
+                ScheduleType = request.ScheduleType,
+                ScheduledTime = TimeOnly.FromDateTime(request.ScheduledTime),
+                ScheduledDayOfWeek = request.ScheduledDayOfWeek,
+                ScheduledDayOfMonth = request.ScheduledDayOfMonth,
+                CreationTime = DateTime.UtcNow,
+                LastExecutionTime = quoteResponse.Quote.OpenDate,
+                ShouldSendFailEmail = false,
+                OriginalQuoteId = request.QuoteId
+            };
+        }
+
+        public async Task<PreviewInstructionResponse> PreviewInstruction(CreateInstructionRequest request)
+        {
+            try
+            {
+                var instruction = await CreateInvestInstruction(request);
+                var nextExecTime = instruction.ScheduleType switch
+                {
+                    ScheduleType.Daily => instruction.LastExecutionTime.AddDays(1),
+                    ScheduleType.Weekly => instruction.LastExecutionTime.AddDays(7),
+                    ScheduleType.Biweekly => instruction.LastExecutionTime.AddDays(14),
+                    ScheduleType.Monthly => instruction.LastExecutionTime.AddMonths(1),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+                return new PreviewInstructionResponse
+                {
+                    IsSuccess = true,
+                    Instruction = instruction,
+                    NextExecutionDate = nextExecTime 
+                };
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "At previewing invest instruction");
+                return new PreviewInstructionResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = e.Message
+                };
+            }
+        }
 
         public async Task<OperationResponse> CreateInstruction(CreateInstructionRequest request)
         {
             try
             {
                 _logger.LogInformation("Creating invest instruction. Request {reqest}", request.ToJson());
-                var instruction = new InvestInstruction
-                {
-                    Id = Guid.NewGuid().ToString("N"),
-                    ClientId = request.ClientId,
-                    BrokerId = request.BrokerId,
-                    WalletId = request.WalletId,
-                    FromAmount = request.FromAmount,
-                    FromAsset = request.FromAsset,
-                    ToAsset = request.ToAsset,
-                    Status = InstructionStatus.Active,
-                    ScheduleType = request.ScheduleType,
-                    ScheduledTime = TimeOnly.FromDateTime(request.ScheduledTime),
-                    ScheduledDayOfWeek = request.ScheduledDayOfWeek,
-                    ScheduledDayOfMonth = request.ScheduledDayOfMonth,
-                    CreationTime = DateTime.UtcNow,
-                    LastExecutionTime = request.ExecuteImmediately ? DateTime.MinValue : DateTime.UtcNow,
-                    ShouldSendFailEmail = false
-                };
+
+                var instruction = await CreateInvestInstruction(request);
+
                 await _repository.UpsertInstructions(instruction);
                 await _repository.UpsertInstructionAudit(instruction);
 
                 return new OperationResponse
                 {
-                    IsSuccess = true
+                    IsSuccess = true,
+                    Instruction = instruction
                 };
             }
             catch (Exception e)
@@ -97,7 +147,8 @@ namespace Service.AutoInvestManager.Services
 
                 return new OperationResponse
                 {
-                    IsSuccess = true
+                    IsSuccess = true,
+                    Instruction = instruction
                 };
             }
             catch (Exception e)
@@ -136,7 +187,8 @@ namespace Service.AutoInvestManager.Services
 
                 return new OperationResponse
                 {
-                    IsSuccess = true
+                    IsSuccess = true,
+                    Instruction = instruction
                 };
             }
             catch (Exception e)
@@ -177,7 +229,8 @@ namespace Service.AutoInvestManager.Services
 
                 return new OperationResponse
                 {
-                    IsSuccess = true
+                    IsSuccess = true,
+                    Instruction = instruction
                 };
             }
             catch (Exception e)

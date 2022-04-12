@@ -7,6 +7,10 @@ namespace Service.AutoInvestManager.Grpc
     [ServiceContract]
     public interface IAutoInvestService
     {
+        
+        [OperationContract]
+        Task<PreviewInstructionResponse> PreviewInstruction(CreateInstructionRequest request);
+        
         [OperationContract]
         Task<OperationResponse> CreateInstruction(CreateInstructionRequest request);
         
