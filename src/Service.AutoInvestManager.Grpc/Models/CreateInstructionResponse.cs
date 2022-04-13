@@ -5,7 +5,7 @@ using Service.AutoInvestManager.Domain.Models;
 namespace Service.AutoInvestManager.Grpc.Models;
 
 [DataContract]
-public class PreviewInstructionResponse
+public class CreateInstructionResponse
 {
     [DataMember(Order = 1)]
     public bool IsSuccess { get; set; }

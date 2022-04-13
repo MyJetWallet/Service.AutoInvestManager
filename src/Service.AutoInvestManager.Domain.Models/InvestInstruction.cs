@@ -20,7 +20,7 @@ namespace Service.AutoInvestManager.Domain.Models
         [DataMember(Order = 8)]public InstructionStatus Status { get; set; }
         
         [DataMember(Order = 9)]public ScheduleType ScheduleType { get; set; }
-        [DataMember(Order = 10)]public TimeOnly ScheduledTime { get; set; }
+        [DataMember(Order = 10)]public DateTime ScheduledDateTime { get; set; }
         [DataMember(Order = 11)]public DayOfWeek ScheduledDayOfWeek { get; set; }
         [DataMember(Order = 12)]public int ScheduledDayOfMonth { get; set; }
         

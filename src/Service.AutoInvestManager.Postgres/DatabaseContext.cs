@@ -57,7 +57,7 @@ namespace Service.AutoInvestManager.Postgres
             modelBuilder.Entity<InvestInstruction>().Property(e => e.ToAsset);
             modelBuilder.Entity<InvestInstruction>().Property(e => e.Status);
             modelBuilder.Entity<InvestInstruction>().Property(e => e.ScheduleType);
-            modelBuilder.Entity<InvestInstruction>().Property(e => e.ScheduledTime);
+            modelBuilder.Entity<InvestInstruction>().Property(e => e.ScheduledDateTime).HasDefaultValue(DateTime.MinValue);
             modelBuilder.Entity<InvestInstruction>().Property(e => e.ScheduledDayOfWeek);
             modelBuilder.Entity<InvestInstruction>().Property(e => e.ScheduledDayOfMonth);
             modelBuilder.Entity<InvestInstruction>().Property(e => e.ScheduleType);

@@ -37,7 +37,7 @@ namespace Service.AutoInvestManager.Domain.Models
                 ToAsset = instruction.ToAsset,
                 Status = instruction.Status,
                 ScheduleType = instruction.ScheduleType,
-                ScheduledTime = instruction.ScheduledTime,
+                ScheduledTime = TimeOnly.FromDateTime(instruction.ScheduledDateTime),
                 ScheduledDayOfWeek = instruction.ScheduledDayOfWeek,
                 ScheduledDayOfMonth = instruction.ScheduledDayOfMonth,
                 CreationTime = instruction.CreationTime,

@@ -9,10 +9,10 @@ namespace Service.AutoInvestManager.Grpc
     {
         
         [OperationContract]
-        Task<PreviewInstructionResponse> PreviewInstruction(CreateInstructionRequest request);
+        Task<CreateInstructionResponse> PreviewInstruction(CreateInstructionRequest request);
         
         [OperationContract]
-        Task<OperationResponse> CreateInstruction(CreateInstructionRequest request);
+        Task<CreateInstructionResponse> CreateInstruction(CreateInstructionRequest request);
         
         [OperationContract]
         Task<OperationResponse> UpdateInstruction(UpdateInstructionRequest request);

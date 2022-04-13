@@ -44,7 +44,7 @@ namespace Service.AutoInvestManager.Services
                 ToAsset = quoteResponse.Quote.ToAsset,
                 Status = InstructionStatus.Active,
                 ScheduleType = request.ScheduleType,
-                ScheduledTime = TimeOnly.FromDateTime(DateTime.UtcNow),
+                ScheduledDateTime = DateTime.UtcNow,
                 ScheduledDayOfWeek = DateTime.UtcNow.DayOfWeek,
                 ScheduledDayOfMonth = DateTime.DaysInMonth(DateTime.UtcNow.Year, DateTime.UtcNow.Month),
                 CreationTime = DateTime.UtcNow,
@@ -54,7 +54,7 @@ namespace Service.AutoInvestManager.Services
             };
         }
 
-        public async Task<PreviewInstructionResponse> PreviewInstruction(CreateInstructionRequest request)
+        public async Task<CreateInstructionResponse> PreviewInstruction(CreateInstructionRequest request)
         {
             try
             {
@@ -67,7 +67,7 @@ namespace Service.AutoInvestManager.Services
                     ScheduleType.Monthly => instruction.LastExecutionTime.AddMonths(1),
                     _ => throw new ArgumentOutOfRangeException()
                 };
-                return new PreviewInstructionResponse
+                return new CreateInstructionResponse
                 {
                     IsSuccess = true,
                     Instruction = instruction,
@@ -77,7 +77,7 @@ namespace Service.AutoInvestManager.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "At previewing invest instruction");
-                return new PreviewInstructionResponse
+                return new CreateInstructionResponse
                 {
                     IsSuccess = false,
                     ErrorMessage = e.Message
@@ -85,27 +85,37 @@ namespace Service.AutoInvestManager.Services
             }
         }
 
-        public async Task<OperationResponse> CreateInstruction(CreateInstructionRequest request)
+        public async Task<CreateInstructionResponse> CreateInstruction(CreateInstructionRequest request)
         {
             try
             {
                 _logger.LogInformation("Creating invest instruction. Request {reqest}", request.ToJson());
 
                 var instruction = await CreateInvestInstruction(request);
-
+                
+                var nextExecTime = instruction.ScheduleType switch
+                {
+                    ScheduleType.Daily => instruction.LastExecutionTime.AddDays(1),
+                    ScheduleType.Weekly => instruction.LastExecutionTime.AddDays(7),
+                    ScheduleType.Biweekly => instruction.LastExecutionTime.AddDays(14),
+                    ScheduleType.Monthly => instruction.LastExecutionTime.AddMonths(1),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+                
                 await _repository.UpsertInstructions(instruction);
                 await _repository.UpsertInstructionAudit(instruction);
 
-                return new OperationResponse
+                return new CreateInstructionResponse
                 {
                     IsSuccess = true,
-                    Instruction = instruction
+                    Instruction = instruction, 
+                    NextExecutionDate = nextExecTime
                 };
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "At switching invest instruction");
-                return new OperationResponse
+                return new CreateInstructionResponse
                 {
                     IsSuccess = false,
                     ErrorMessage = e.Message
@@ -136,7 +146,7 @@ namespace Service.AutoInvestManager.Services
                 instruction.FromAmount = request.FromAmount;
                 instruction.Status = InstructionStatus.Active;
                 instruction.ScheduleType = request.ScheduleType;
-                instruction.ScheduledTime = TimeOnly.FromDateTime(request.ScheduledTime);
+                instruction.ScheduledDateTime = request.ScheduledTime;
                 instruction.ScheduledDayOfWeek = request.ScheduledDayOfWeek;
                 instruction.ScheduledDayOfMonth = request.ScheduledDayOfMonth;
                 instruction.LastExecutionTime = DateTime.MinValue;
