@@ -16,6 +16,8 @@ namespace Service.AutoInvestManager.Modules
 
             builder.RegisterLiquidityConverterClient(Program.Settings.LiquidityConverterGrpcServiceUrl);
             
+            builder.RegisterLiquidityConverterManagerClient(Program.Settings.LiquidityConverterGrpcServiceUrl);
+            
             builder
                 .RegisterType<InstructionsRepository>()
                 .AsSelf()
