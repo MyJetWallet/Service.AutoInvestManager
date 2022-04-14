@@ -53,7 +53,7 @@ jobs:
       with:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-        path: ./publish-api
+        path: ./publish-worker
         registry: docker.pkg.github.com
         repository: ${{ secrets.ORG_NAME }}/service.autoinvestmanager/myjetwallet.service.autoinvestmanager.worker-test
         tags: latest
@@ -76,7 +76,7 @@ jobs:
       with:
         username: ${{ secrets.ST_DOCKER_USER }}
         password: ${{ secrets.ST_DOCKER_PASSWORD }}
-        path: ./publish-api
+        path: ./publish-worker
         registry: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
         repository: spot/myjetwallet.service.autoinvestmanager.worker-test
         tags: latest
