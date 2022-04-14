@@ -36,6 +36,12 @@ jobs:
 
     - name: Check Service dir
       run: ls ./publish-api
+
+    - name: Publish Worker
+      run: dotnet publish --no-build ./src/Service.AutoInvestManager.Worker/Service.AutoInvestManager.Worker.csproj --configuration Release --output ./publish-worker
+
+    - name: Check Worker dir
+      run: ls ./publish-worker
       
     - name: Publish image
       uses: docker/build-push-action@v1
