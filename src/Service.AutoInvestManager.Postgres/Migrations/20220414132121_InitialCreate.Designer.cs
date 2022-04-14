@@ -12,15 +12,15 @@ using Service.AutoInvestManager.Postgres;
 namespace Service.AutoInvestManager.Postgres.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20220404075836_InitialCreate")]
+    [Migration("20220414132121_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("autoinvest")
-                .HasAnnotation("ProductVersion", "6.0.3")
+                .HasDefaultSchema("recurringbuy")
+                .HasAnnotation("ProductVersion", "6.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -41,6 +41,14 @@ namespace Service.AutoInvestManager.Postgres.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValue(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
+                    b.Property<string>("ErrorText")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("FailureTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValue(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
+
                     b.Property<decimal>("FromAmount")
                         .HasColumnType("numeric");
 
@@ -52,17 +60,22 @@ namespace Service.AutoInvestManager.Postgres.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValue(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
+                    b.Property<string>("OriginalQuoteId")
+                        .HasColumnType("text");
+
                     b.Property<int>("ScheduleType")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime>("ScheduledDateTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValue(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
                     b.Property<int>("ScheduledDayOfMonth")
                         .HasColumnType("integer");
 
                     b.Property<int>("ScheduledDayOfWeek")
                         .HasColumnType("integer");
-
-                    b.Property<TimeOnly>("ScheduledTime")
-                        .HasColumnType("time without time zone");
 
                     b.Property<bool>("ShouldSendFailEmail")
                         .HasColumnType("boolean");
@@ -82,7 +95,7 @@ namespace Service.AutoInvestManager.Postgres.Migrations
 
                     b.HasIndex("Status");
 
-                    b.ToTable("instructions", "autoinvest");
+                    b.ToTable("instructions", "recurringbuy");
                 });
 
             modelBuilder.Entity("Service.AutoInvestManager.Domain.Models.InvestInstructionAuditRecord", b =>
@@ -153,7 +166,7 @@ namespace Service.AutoInvestManager.Postgres.Migrations
 
                     b.HasIndex("InstructionId");
 
-                    b.ToTable("audit", "autoinvest");
+                    b.ToTable("audit", "recurringbuy");
                 });
 
             modelBuilder.Entity("Service.AutoInvestManager.Domain.Models.InvestOrder", b =>
@@ -165,6 +178,9 @@ namespace Service.AutoInvestManager.Postgres.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("ClientId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ErrorText")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("ExecutionTime")
@@ -184,6 +200,9 @@ namespace Service.AutoInvestManager.Postgres.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
+                    b.Property<string>("QuoteId")
+                        .HasColumnType("text");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -202,7 +221,7 @@ namespace Service.AutoInvestManager.Postgres.Migrations
 
                     b.HasIndex("Status");
 
-                    b.ToTable("orders", "autoinvest");
+                    b.ToTable("orders", "recurringbuy");
                 });
 #pragma warning restore 612, 618
         }

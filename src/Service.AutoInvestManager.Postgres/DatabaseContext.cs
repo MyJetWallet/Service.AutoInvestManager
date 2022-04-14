@@ -8,7 +8,7 @@ namespace Service.AutoInvestManager.Postgres
 {
     public class DatabaseContext : MyDbContext
     {
-        public const string Schema = "autoinvest";
+        public const string Schema = "recurringbuy";
 
         private const string InstructionsTableName = "instructions";
         private const string OrdersTableName = "orders";
@@ -64,6 +64,7 @@ namespace Service.AutoInvestManager.Postgres
             modelBuilder.Entity<InvestInstruction>().Property(e => e.CreationTime).HasDefaultValue(DateTime.MinValue);
             modelBuilder.Entity<InvestInstruction>().Property(e => e.LastExecutionTime).HasDefaultValue(DateTime.MinValue);
             modelBuilder.Entity<InvestInstruction>().Property(e => e.ShouldSendFailEmail);
+            modelBuilder.Entity<InvestInstruction>().Property(e => e.FailureTime).HasDefaultValue(DateTime.MinValue);
 
             modelBuilder.Entity<InvestInstruction>().HasIndex(e => e.ClientId);
             modelBuilder.Entity<InvestInstruction>().HasIndex(e => e.Status);

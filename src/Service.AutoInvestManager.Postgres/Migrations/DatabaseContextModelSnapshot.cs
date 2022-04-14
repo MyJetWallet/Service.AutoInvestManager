@@ -17,7 +17,7 @@ namespace Service.AutoInvestManager.Postgres.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("autoinvest")
+                .HasDefaultSchema("recurringbuy")
                 .HasAnnotation("ProductVersion", "6.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -35,6 +35,14 @@ namespace Service.AutoInvestManager.Postgres.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreationTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValue(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
+
+                    b.Property<string>("ErrorText")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("FailureTime")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValue(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
@@ -85,7 +93,7 @@ namespace Service.AutoInvestManager.Postgres.Migrations
 
                     b.HasIndex("Status");
 
-                    b.ToTable("instructions", "autoinvest");
+                    b.ToTable("instructions", "recurringbuy");
                 });
 
             modelBuilder.Entity("Service.AutoInvestManager.Domain.Models.InvestInstructionAuditRecord", b =>
@@ -156,7 +164,7 @@ namespace Service.AutoInvestManager.Postgres.Migrations
 
                     b.HasIndex("InstructionId");
 
-                    b.ToTable("audit", "autoinvest");
+                    b.ToTable("audit", "recurringbuy");
                 });
 
             modelBuilder.Entity("Service.AutoInvestManager.Domain.Models.InvestOrder", b =>
@@ -168,6 +176,9 @@ namespace Service.AutoInvestManager.Postgres.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("ClientId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ErrorText")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("ExecutionTime")
@@ -187,6 +198,9 @@ namespace Service.AutoInvestManager.Postgres.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
+                    b.Property<string>("QuoteId")
+                        .HasColumnType("text");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -205,7 +219,7 @@ namespace Service.AutoInvestManager.Postgres.Migrations
 
                     b.HasIndex("Status");
 
-                    b.ToTable("orders", "autoinvest");
+                    b.ToTable("orders", "recurringbuy");
                 });
 #pragma warning restore 612, 618
         }

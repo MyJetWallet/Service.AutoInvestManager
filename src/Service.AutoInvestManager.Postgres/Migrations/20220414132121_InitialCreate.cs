@@ -11,11 +11,11 @@ namespace Service.AutoInvestManager.Postgres.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
-                name: "autoinvest");
+                name: "recurringbuy");
 
             migrationBuilder.CreateTable(
                 name: "audit",
-                schema: "autoinvest",
+                schema: "recurringbuy",
                 columns: table => new
                 {
                     LogId = table.Column<long>(type: "bigint", nullable: false)
@@ -44,7 +44,7 @@ namespace Service.AutoInvestManager.Postgres.Migrations
 
             migrationBuilder.CreateTable(
                 name: "instructions",
-                schema: "autoinvest",
+                schema: "recurringbuy",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -56,12 +56,15 @@ namespace Service.AutoInvestManager.Postgres.Migrations
                     ToAsset = table.Column<string>(type: "text", nullable: true),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     ScheduleType = table.Column<int>(type: "integer", nullable: false),
-                    ScheduledTime = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
+                    ScheduledDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)),
                     ScheduledDayOfWeek = table.Column<int>(type: "integer", nullable: false),
                     ScheduledDayOfMonth = table.Column<int>(type: "integer", nullable: false),
                     CreationTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)),
                     LastExecutionTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)),
-                    ShouldSendFailEmail = table.Column<bool>(type: "boolean", nullable: false)
+                    ShouldSendFailEmail = table.Column<bool>(type: "boolean", nullable: false),
+                    OriginalQuoteId = table.Column<string>(type: "text", nullable: true),
+                    ErrorText = table.Column<string>(type: "text", nullable: true),
+                    FailureTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc))
                 },
                 constraints: table =>
                 {
@@ -70,7 +73,7 @@ namespace Service.AutoInvestManager.Postgres.Migrations
 
             migrationBuilder.CreateTable(
                 name: "orders",
-                schema: "autoinvest",
+                schema: "recurringbuy",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -84,7 +87,9 @@ namespace Service.AutoInvestManager.Postgres.Migrations
                     ToAsset = table.Column<string>(type: "text", nullable: true),
                     Price = table.Column<decimal>(type: "numeric", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
-                    ExecutionTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc))
+                    ExecutionTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)),
+                    ErrorText = table.Column<string>(type: "text", nullable: true),
+                    QuoteId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -93,37 +98,37 @@ namespace Service.AutoInvestManager.Postgres.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_audit_ClientId",
-                schema: "autoinvest",
+                schema: "recurringbuy",
                 table: "audit",
                 column: "ClientId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_audit_InstructionId",
-                schema: "autoinvest",
+                schema: "recurringbuy",
                 table: "audit",
                 column: "InstructionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_instructions_ClientId",
-                schema: "autoinvest",
+                schema: "recurringbuy",
                 table: "instructions",
                 column: "ClientId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_instructions_Status",
-                schema: "autoinvest",
+                schema: "recurringbuy",
                 table: "instructions",
                 column: "Status");
 
             migrationBuilder.CreateIndex(
                 name: "IX_orders_ClientId",
-                schema: "autoinvest",
+                schema: "recurringbuy",
                 table: "orders",
                 column: "ClientId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_orders_Status",
-                schema: "autoinvest",
+                schema: "recurringbuy",
                 table: "orders",
                 column: "Status");
         }
@@ -132,15 +137,15 @@ namespace Service.AutoInvestManager.Postgres.Migrations
         {
             migrationBuilder.DropTable(
                 name: "audit",
-                schema: "autoinvest");
+                schema: "recurringbuy");
 
             migrationBuilder.DropTable(
                 name: "instructions",
-                schema: "autoinvest");
+                schema: "recurringbuy");
 
             migrationBuilder.DropTable(
                 name: "orders",
-                schema: "autoinvest");
+                schema: "recurringbuy");
         }
     }
 }

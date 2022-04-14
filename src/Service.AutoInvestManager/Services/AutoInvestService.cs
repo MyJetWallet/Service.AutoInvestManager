@@ -2,10 +2,10 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
+using Service.AutoInvestManager.Domain.Helpers;
 using Service.AutoInvestManager.Domain.Models;
 using Service.AutoInvestManager.Grpc;
 using Service.AutoInvestManager.Grpc.Models;
-using Service.AutoInvestManager.Helpers;
 using Service.Liquidity.Converter.Grpc;
 using Service.Liquidity.Converter.Grpc.Models;
 

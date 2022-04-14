@@ -9,7 +9,7 @@ using Service.AutoInvestManager.Domain.Models;
 using Service.AutoInvestManager.Domain.Models.NoSql;
 using Service.AutoInvestManager.Postgres;
 
-namespace Service.AutoInvestManager.Helpers
+namespace Service.AutoInvestManager.Domain.Helpers
 {
     public class InstructionsRepository
     {
@@ -41,6 +41,17 @@ namespace Service.AutoInvestManager.Helpers
             {
                 await _writer.DeleteAsync(InvestInstructionNoSqlEntity.GeneratePartitionKey(instruction.ClientId),InvestInstructionNoSqlEntity.GenerateRowKey(instruction.Id));
             }
+        }
+        
+        public async Task UpsertOrders(InvestOrder order)
+        {
+            await UpsertOrders(new List<InvestOrder> { order });
+        }
+
+        public async Task UpsertOrders(List<InvestOrder> orders)
+        {
+            await using var context = new DatabaseContext(_dbContextOptionsBuilder.Options);
+            await context.UpsertAsync(orders);
         }
 
         public async Task UpsertInstructionAudit(InvestInstruction instruction)
@@ -77,6 +88,24 @@ namespace Service.AutoInvestManager.Helpers
                 throw;
             }
         }
+
+        public async Task<List<InvestInstruction>> GetInstructionsByStatus(InstructionStatus status)
+        {
+            await using var context = new DatabaseContext(_dbContextOptionsBuilder.Options);
+            return await context.Instructions.Where(t=>t.Status == status).ToListAsync();
+        }
+
+        public async Task<List<InvestOrder>> GetScheduledInvestOrders()
+        {
+            await using var context = new DatabaseContext(_dbContextOptionsBuilder.Options);
+            return await context.Orders.Where(t=>t.Status == OrderStatus.Scheduled).ToListAsync();
+        }
+        
+        public async Task<InvestInstruction> GetInstructionById(string id)
+        {
+            await using var context = new DatabaseContext(_dbContextOptionsBuilder.Options);
+            return await context.Instructions.FirstOrDefaultAsync(t=>t.Id == id);
+        }
         
         public async Task<List<InvestOrder>> GetInvestOrders(string searchText, int take, DateTime lastSeen)
         {
@@ -97,7 +126,7 @@ namespace Service.AutoInvestManager.Helpers
                                              t.ToAsset.Contains(searchText)||
                                              t.InvestInstructionId.Equals(searchText) ||
                                              t.Id.Equals(searchText));
-
+                
                 return await query.OrderByDescending(t => t.ExecutionTime).Take(take).ToListAsync();
             }
             catch (Exception e)

@@ -2,8 +2,8 @@
 using Autofac.Core;
 using Autofac.Core.Registration;
 using MyJetWallet.Sdk.NoSql;
+using Service.AutoInvestManager.Domain.Helpers;
 using Service.AutoInvestManager.Domain.Models.NoSql;
-using Service.AutoInvestManager.Helpers;
 using Service.Liquidity.Converter.Client;
 
 namespace Service.AutoInvestManager.Modules

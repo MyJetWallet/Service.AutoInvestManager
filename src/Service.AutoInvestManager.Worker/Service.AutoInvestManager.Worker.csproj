@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>9</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.2.0" />
+        <PackageReference Include="Grpc.AspNetCore" Version="2.44.0" />
+        <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+        <PackageReference Include="MyJetWallet.Domain" Version="1.1.1" />
+        <PackageReference Include="MyJetWallet.Sdk.GrpcMetrics" Version="2.0.4" />
+        <PackageReference Include="MyJetWallet.Sdk.GrpcSchema" Version="1.0.6" />
+        <PackageReference Include="MyJetWallet.Sdk.NoSql" Version="2.1.2" />
+        <PackageReference Include="MyJetWallet.Sdk.Service" Version="2.1.7" />
+        <PackageReference Include="MyJetWallet.Sdk.ServiceBus" Version="2.2.2" />
+        <PackageReference Include="MyJetWallet.Service.EmailSender.Client" Version="1.1.4" />
+        <PackageReference Include="MyJetWallet.Service.Liquidity.Converter.Client" Version="1.6.1" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Include="prometheus-net.AspNetCore" Version="6.0.0" />
+        <PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.0.152" />
+        <PackageReference Include="SimpleTrading.BaseMetrics" Version="1.0.3" />
+        <PackageReference Include="SimpleTrading.ServiceStatusReporterConnector" Version="1.0.9" />
+        <PackageReference Include="MySettingsReader" Version="1.2.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Service.AutoInvestManager.Domain\Service.AutoInvestManager.Domain.csproj" />
+        <ProjectReference Include="..\Service.AutoInvestManager.Grpc\Service.AutoInvestManager.Grpc.csproj" />
+        <ProjectReference Include="..\Service.AutoInvestManager.Postgres\Service.AutoInvestManager.Postgres.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Dockerfile">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+</Project>
