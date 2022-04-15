@@ -120,7 +120,7 @@ namespace Service.AutoInvestManager.Domain.Helpers
 
                 var query = context.Orders.AsQueryable();
                 if (lastSeen != DateTime.MinValue)
-                    query = query.Where(t => t.ExecutionTime < lastSeen);
+                    query = query.Where(t => t.CreationTime < lastSeen);
 
                 if (!string.IsNullOrWhiteSpace(searchText))
                     query = query.Where(t => t.ClientId.Contains(searchText) ||
