@@ -271,7 +271,7 @@ namespace Service.AutoInvestManager.Services
         {
             _logger.LogInformation("Getting instruction. Request {reqest}", request.ToJson());
             var instruction =
-                await _repository.GetInvestInstructions(request.SearchText, request.Take, request.LastSeen);
+                await _repository.GetInvestInstructions(request.SearchText, request.Take, request.LastSeen, request.Status);
             return new GetInstructionResponse
             {
                 Instructions = instruction

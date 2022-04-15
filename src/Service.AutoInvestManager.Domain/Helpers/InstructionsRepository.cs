@@ -61,7 +61,7 @@ namespace Service.AutoInvestManager.Domain.Helpers
             await context.SaveChangesAsync();
         }
 
-        public async Task<List<InvestInstruction>> GetInvestInstructions(string searchText, int take, DateTime lastSeen)
+        public async Task<List<InvestInstruction>> GetInvestInstructions(string searchText, int take, DateTime lastSeen, InstructionStatus? status)
         {
             try
             {
@@ -72,6 +72,9 @@ namespace Service.AutoInvestManager.Domain.Helpers
                 var query = context.Instructions.AsQueryable();
                 if (lastSeen != DateTime.MinValue)
                     query = query.Where(t => t.CreationTime < lastSeen);
+                
+                if (status != null)
+                    query = query.Where(t => t.Status == status);
 
                 if (!string.IsNullOrWhiteSpace(searchText))
                     query = query.Where(t => t.ClientId.Contains(searchText) ||
