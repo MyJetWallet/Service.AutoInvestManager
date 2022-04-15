@@ -26,6 +26,8 @@ namespace Service.AutoInvestManager.Domain.Models
         
         [DataMember(Order = 13)]public string ErrorText { get; set; }
         [DataMember(Order = 14)]public string QuoteId { get; set; }
+        [DataMember(Order = 15)] public DateTime CreationTime { get; set; }
+
 
     }
 }

@@ -6,11 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.Net.Client" Version="2.44.0" />
-    <PackageReference Include="protobuf-net.Grpc" Version="1.0.152" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\src\Service.AutoInvestManager.Client\Service.AutoInvestManager.Client.csproj" />
     <ProjectReference Include="..\..\src\Service.AutoInvestManager.Grpc\Service.AutoInvestManager.Grpc.csproj" />
   </ItemGroup>

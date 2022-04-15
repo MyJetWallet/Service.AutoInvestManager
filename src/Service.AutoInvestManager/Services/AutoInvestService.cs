@@ -16,20 +16,23 @@ namespace Service.AutoInvestManager.Services
         private readonly ILogger<AutoInvestService> _logger;
         private readonly InstructionsRepository _repository;
         private readonly IHistoryService _quoteHistoryService;
-
-        public AutoInvestService(ILogger<AutoInvestService> logger, InstructionsRepository repository, IHistoryService quoteHistoryService)
+        private readonly IQuoteService _quoteService;
+        public AutoInvestService(ILogger<AutoInvestService> logger, InstructionsRepository repository, IHistoryService quoteHistoryService, IQuoteService quoteService)
         {
             _logger = logger;
             _repository = repository;
             _quoteHistoryService = quoteHistoryService;
+            _quoteService = quoteService;
         }
 
         private async Task<InvestInstruction> CreateInvestInstruction(CreateInstructionRequest request)
         {
+            
             var quoteResponse = await _quoteHistoryService.GetQuoteById(new GetQuoteByIdRequest
             {
                 QuoteId = request.QuoteId
             });
+            var t = _quoteService.GetQuoteAsync(new GetQuoteRequest());
             if (!quoteResponse.Success)
                 throw new Exception("Quote not found");
 

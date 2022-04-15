@@ -7,6 +7,7 @@ using Service.AutoInvestManager.Domain.Models.NoSql;
 using Service.AutoInvestManager.Worker.Jobs;
 using Service.EmailSender.Client;
 using Service.Liquidity.Converter.Client;
+using Service.Liquidity.Converter.Grpc;
 
 namespace Service.AutoInvestManager.Worker.Modules
 {
@@ -15,8 +16,9 @@ namespace Service.AutoInvestManager.Worker.Modules
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterMyNoSqlWriter<InvestInstructionNoSqlEntity>(()=>Program.Settings.MyNoSqlWriterUrl, InvestInstructionNoSqlEntity.TableName);
-            builder.RegisterLiquidityConverterClient(Program.Settings.LiquidityConverterGrpcServiceUrl); 
             builder.RegisterEmailSenderClient(Program.Settings.EmailSenderGrpcServiceUrl);
+  
+            builder.RegisterLiquidityConverterClient(Program.Settings.LiquidityConverterGrpcServiceUrl);
 
             var serviceBusClient = builder.RegisterMyServiceBusTcpClient(()=>Program.Settings.SpotServiceBusHostPort, Program.LogFactory);
             builder.RegisterMyServiceBusPublisher<InvestOrder>(serviceBusClient, InvestOrder.TopicName, true);

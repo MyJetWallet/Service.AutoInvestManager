@@ -3,12 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using Microsoft.Extensions.Logging;
+using MyJetWallet.Sdk.Service;
 using MyJetWallet.Sdk.Service.Tools;
 using MyJetWallet.Sdk.ServiceBus;
 using MyServiceBus.Abstractions;
 using Service.AutoInvestManager.Domain.Helpers;
 using Service.AutoInvestManager.Domain.Models;
 using Service.EmailSender.Grpc;
+using Service.EmailSender.Grpc.Models;
 using Service.Liquidity.Converter.Domain.Models;
 using Service.Liquidity.Converter.Grpc;
 using Service.Liquidity.Converter.Grpc.Models;
@@ -62,9 +64,11 @@ namespace Service.AutoInvestManager.Worker.Jobs
                         FromAsset = instruction.FromAsset,
                         ToAsset = instruction.ToAsset,
                         Status = OrderStatus.Scheduled,
+                        CreationTime = DateTime.UtcNow,
                     };
 
                     await _repository.UpsertOrders(order);
+                    _logger.LogInformation("Created order {order} based on instruction {instructionId}", order.ToJson(), instruction.Id);
                     
                     instruction.LastExecutionTime = DateTime.UtcNow;
                     instruction.ShouldSendFailEmail = false;
@@ -141,6 +145,7 @@ namespace Service.AutoInvestManager.Worker.Jobs
                         await SetInstructionAsFailed(order);
                     }
                     await _repository.UpsertOrders(order);
+                    _logger.LogInformation("Executed order {orderId} with result {quoteResul}", order.Id, quoteResult);
                 }
 
                 await _publisher.PublishAsync(orders);
