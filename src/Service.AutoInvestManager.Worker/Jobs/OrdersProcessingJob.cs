@@ -99,11 +99,13 @@ namespace Service.AutoInvestManager.Worker.Jobs
                         FromAsset = order.FromAsset,
                         ToAsset = order.ToAsset,
                         FromAssetVolume = order.FromAmount,
+                        ToAssetVolume = 0.0m,
                         IsFromFixed = true,
                         BrokerId = order.BrokerId,
                         AccountId = order.ClientId,
                         WalletId = order.WalletId,
                         QuoteType = QuoteType.AutoInvest,
+                        RecurringBuy = null
                     });
                     if (!quote.IsSuccess)
                     {
@@ -126,6 +128,7 @@ namespace Service.AutoInvestManager.Worker.Jobs
                         WalletId = quote.Data.WalletId,
                         OperationId = quote.Data.OperationId,
                         Price = quote.Data.Price,
+                        RelatedRecurringBuyId = order.InvestInstructionId,
                     });
 
                     order.QuoteId = quoteResult.Data.OperationId;
@@ -145,7 +148,7 @@ namespace Service.AutoInvestManager.Worker.Jobs
                         await SetInstructionAsFailed(order);
                     }
                     await _repository.UpsertOrders(order);
-                    _logger.LogInformation("Executed order {orderId} with result {quoteResul}", order.Id, quoteResult);
+                    _logger.LogInformation("Executed order {orderId} with result {quoteResul}", order.Id, quoteResult.ToJson());
                 }
 
                 await _publisher.PublishAsync(orders);
@@ -194,6 +197,7 @@ namespace Service.AutoInvestManager.Worker.Jobs
         }
         private static bool IsExpired(InvestInstruction instruction)
         {
+            return instruction.LastExecutionTime < DateTime.UtcNow.AddMinutes(-3);
             return instruction.ScheduleType switch
             {
                 ScheduleType.Daily => instruction.LastExecutionTime < DateTime.UtcNow.AddDays(-1),
