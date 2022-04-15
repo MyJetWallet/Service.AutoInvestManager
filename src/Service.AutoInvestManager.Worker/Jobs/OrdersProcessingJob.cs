@@ -63,6 +63,7 @@ namespace Service.AutoInvestManager.Worker.Jobs
                         ToAsset = instruction.ToAsset,
                         Status = OrderStatus.Scheduled,
                         CreationTime = DateTime.UtcNow,
+                        ScheduleType = instruction.ScheduleType
                     };
 
                     await _repository.UpsertOrders(order);
@@ -136,6 +137,9 @@ namespace Service.AutoInvestManager.Worker.Jobs
                         order.ExecutionTime = DateTime.UtcNow;
                         order.Price = quoteResult.Data.Price;
                         order.ToAmount = quote.Data.ToAssetVolume;
+                        order.FeeAmount = quote.Data.FeeAmount;
+                        order.FeeCoef = quote.Data.FeeCoef;
+                        order.FeeAsset = quote.Data.FeeAsset;
                         order.Status = OrderStatus.Executed;
                     }
 

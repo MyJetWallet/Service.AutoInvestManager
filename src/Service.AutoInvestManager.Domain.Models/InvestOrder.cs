@@ -27,6 +27,11 @@ namespace Service.AutoInvestManager.Domain.Models
         [DataMember(Order = 13)]public string ErrorText { get; set; }
         [DataMember(Order = 14)]public string QuoteId { get; set; }
         [DataMember(Order = 15)] public DateTime CreationTime { get; set; }
+        
+        [DataMember(Order = 16)]public decimal FeeAmount { get; set; }
+        [DataMember(Order = 17)]public string FeeAsset { get; set; }
+        [DataMember(Order = 18)]public decimal FeeCoef { get; set; }
+        [DataMember(Order = 19)]public ScheduleType ScheduleType { get; set; }
 
 
     }
