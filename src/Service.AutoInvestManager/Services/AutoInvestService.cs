@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
+using MyJetWallet.Sdk.ServiceBus;
 using Service.AutoInvestManager.Domain.Helpers;
 using Service.AutoInvestManager.Domain.Models;
 using Service.AutoInvestManager.Grpc;
@@ -17,12 +18,15 @@ namespace Service.AutoInvestManager.Services
         private readonly InstructionsRepository _repository;
         private readonly IHistoryService _quoteHistoryService;
         private readonly IQuoteService _quoteService;
-        public AutoInvestService(ILogger<AutoInvestService> logger, InstructionsRepository repository, IHistoryService quoteHistoryService, IQuoteService quoteService)
+        private readonly IServiceBusPublisher<InvestInstruction> _publisher;
+
+        public AutoInvestService(ILogger<AutoInvestService> logger, InstructionsRepository repository, IHistoryService quoteHistoryService, IQuoteService quoteService, IServiceBusPublisher<InvestInstruction> publisher)
         {
             _logger = logger;
             _repository = repository;
             _quoteHistoryService = quoteHistoryService;
             _quoteService = quoteService;
+            _publisher = publisher;
         }
 
         private async Task<InvestInstruction> CreateInvestInstruction(CreateInstructionRequest request)
@@ -108,6 +112,7 @@ namespace Service.AutoInvestManager.Services
                 await _repository.UpsertInstructions(instruction);
                 await _repository.UpsertInstructionAudit(instruction);
 
+                await _publisher.PublishAsync(instruction);
                 return new CreateInstructionResponse
                 {
                     IsSuccess = true,

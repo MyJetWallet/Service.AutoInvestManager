@@ -7,6 +7,8 @@ namespace Service.AutoInvestManager.Domain.Models
     [DataContract]
     public class InvestInstruction
     {
+        public const string TopicName = "recurringbuy-investinstructions";
+
         [DataMember(Order = 1)]public string Id { get; set; }
         [DataMember(Order = 2)]public string ClientId { get; set; }
         [DataMember(Order = 3)]public string BrokerId { get; set; }
