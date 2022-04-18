@@ -34,5 +34,8 @@ namespace Service.AutoInvestManager.Worker.Settings
         
         [YamlProperty("AutoInvestManager.EmailSenderGrpcServiceUrl")]
         public string EmailSenderGrpcServiceUrl { get; set; }
+                
+        [YamlProperty("AutoInvestManager.PersonalDataGrpcServiceUrl")]
+        public string PersonalDataServiceUrl { get; set; }
     }
 }

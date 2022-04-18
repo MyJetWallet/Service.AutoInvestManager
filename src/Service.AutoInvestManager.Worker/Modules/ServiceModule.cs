@@ -8,6 +8,7 @@ using Service.AutoInvestManager.Worker.Jobs;
 using Service.EmailSender.Client;
 using Service.Liquidity.Converter.Client;
 using Service.Liquidity.Converter.Grpc;
+using Service.PersonalData.Client;
 
 namespace Service.AutoInvestManager.Worker.Modules
 {
@@ -19,6 +20,7 @@ namespace Service.AutoInvestManager.Worker.Modules
             builder.RegisterEmailSenderClient(Program.Settings.EmailSenderGrpcServiceUrl);
   
             builder.RegisterLiquidityConverterClient(Program.Settings.LiquidityConverterGrpcServiceUrl);
+            builder.RegisterPersonalDataClient(Program.Settings.PersonalDataServiceUrl);
 
             var serviceBusClient = builder.RegisterMyServiceBusTcpClient(()=>Program.Settings.SpotServiceBusHostPort, Program.LogFactory);
             builder.RegisterMyServiceBusPublisher<InvestOrder>(serviceBusClient, InvestOrder.TopicName, true);

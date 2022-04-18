@@ -9,9 +9,12 @@ using MyJetWallet.Sdk.ServiceBus;
 using Service.AutoInvestManager.Domain.Helpers;
 using Service.AutoInvestManager.Domain.Models;
 using Service.EmailSender.Grpc;
+using Service.EmailSender.Grpc.Models;
 using Service.Liquidity.Converter.Domain.Models;
 using Service.Liquidity.Converter.Grpc;
 using Service.Liquidity.Converter.Grpc.Models;
+using Service.PersonalData.Grpc;
+using Service.PersonalData.Grpc.Contracts;
 
 namespace Service.AutoInvestManager.Worker.Jobs
 {
@@ -22,15 +25,17 @@ namespace Service.AutoInvestManager.Worker.Jobs
         private readonly MyTaskTimer _timer;
         private readonly IQuoteService _quoteService;
         private readonly IServiceBusPublisher<InvestOrder> _publisher;
-        private readonly IEmailSenderService _emailSender; 
+        private readonly IEmailSenderService _emailSender;
+        private readonly IPersonalDataServiceGrpc _personalData;
         
-        public OrdersProcessingJob(ILogger<OrdersProcessingJob> logger, InstructionsRepository repository, IQuoteService quoteService, IServiceBusPublisher<InvestOrder> publisher, IEmailSenderService emailSender)
+        public OrdersProcessingJob(ILogger<OrdersProcessingJob> logger, InstructionsRepository repository, IQuoteService quoteService, IServiceBusPublisher<InvestOrder> publisher, IEmailSenderService emailSender, IPersonalDataServiceGrpc personalData)
         {
             _logger = logger;
             _repository = repository;
             _quoteService = quoteService;
             _publisher = publisher;
             _emailSender = emailSender;
+            _personalData = personalData;
             _timer = new MyTaskTimer(typeof(OrdersProcessingJob), TimeSpan.FromSeconds(Program.Settings.TimerPeriodInSeconds), logger, DoTime);
         }
 
@@ -186,7 +191,30 @@ namespace Service.AutoInvestManager.Worker.Jobs
                 {
                     if (instruction.FailureTime.Day != DateTime.UtcNow.Day)
                     {
-                        //TODO: Send email
+                        var pd = await _personalData.GetByIdAsync(new GetByIdRequest
+                        {
+                            Id = instruction.ClientId
+                        });
+                        if (pd.PersonalData == null) 
+                            continue;
+                        
+                        var emailResponse = await _emailSender.SendRecurringBuyFailedEmailAsync(
+                            new RecurrentBuyFailedGrpcRequestContract
+                            {
+                                Brand = pd.PersonalData.BrandId,
+                                Lang = "En",
+                                Platform = pd.PersonalData.PlatformType,
+                                Email = pd.PersonalData.Email,
+                                ToAsset = instruction.ToAsset,
+                                FailureReason = instruction.ErrorText,
+                                FromAmount = instruction.FromAmount,
+                                FromAsset = instruction.FromAsset,
+                                FailTime = instruction.FailureTime.ToString("R")
+                            });
+                        
+                        if (!emailResponse.Result) 
+                            continue;
+                        
                         instruction.ShouldSendFailEmail = false;
                         await _repository.UpsertInstructions(instruction);
                     }
