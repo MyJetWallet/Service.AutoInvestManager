@@ -75,6 +75,9 @@ namespace Service.AutoInvestManager.Worker.Jobs
                     _logger.LogInformation("Created order {order} based on instruction {instructionId}", order.ToJson(), instruction.Id);
                     
                     instruction.LastExecutionTime = DateTime.UtcNow;
+                    instruction.TotalFromAmount += order.FromAmount;
+                    instruction.TotalToAmount += order.ToAmount;
+                    
                     instruction.ShouldSendFailEmail = false;
                     instruction.ErrorText = String.Empty;
                     instruction.FailureTime = DateTime.MinValue;
