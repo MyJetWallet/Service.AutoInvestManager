@@ -108,7 +108,7 @@ jobs:
         echo $reg
         find . -type f -name "deployment.*" -print0 -exec sed -i -r $reg {} \;
         pattern=myjetwallet.service.autoinvestmanager.worker:.*$
-        imagename=myjetwallet.service.autoinvestmanager:${GITHUB_REF#refs/tags/}
+        imagename=myjetwallet.service.autoinvestmanager.worker:${GITHUB_REF#refs/tags/}
         reg=$"s/${pattern}/${imagename}/g"
         echo $reg
         find . -type f -name "deployment.*" -print0 -exec sed -i -r $reg {} \;
