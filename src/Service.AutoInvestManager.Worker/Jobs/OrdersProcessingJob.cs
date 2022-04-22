@@ -149,8 +149,8 @@ namespace Service.AutoInvestManager.Worker.Jobs
                         order.FeeCoef = quote.Data.FeeCoef;
                         order.FeeAsset = quote.Data.FeeAsset;
                         order.Status = OrderStatus.Executed;
+                        await UpdateAvgPrice(order);
                     }
-
                     if (quoteResult.QuoteExecutionResult == QuoteExecutionResult.Error || quoteResult.QuoteExecutionResult == QuoteExecutionResult.ReQuote)
                     {
                         order.Status = OrderStatus.Failed;
@@ -178,6 +178,13 @@ namespace Service.AutoInvestManager.Worker.Jobs
                 instruction.ShouldSendFailEmail = true;
                 instruction.FailureTime = DateTime.UtcNow;
                 
+                await _repository.UpsertInstructions(instruction);
+            }
+            
+            async Task UpdateAvgPrice(InvestOrder order)
+            {
+                var instruction = await _repository.GetInstructionById(order.InvestInstructionId);
+                instruction.AvgPrice = (instruction.AvgPrice + order.Price)/2;
                 await _repository.UpsertInstructions(instruction);
             }
         }
@@ -230,7 +237,7 @@ namespace Service.AutoInvestManager.Worker.Jobs
         }
         private static bool IsExpired(InvestInstruction instruction)
         {
-            //return instruction.LastExecutionTime < DateTime.UtcNow.AddMinutes(-3);
+            return instruction.LastExecutionTime < DateTime.UtcNow.AddMinutes(-3);
             return instruction.ScheduleType switch
             {
                 ScheduleType.Daily => instruction.LastExecutionTime < DateTime.UtcNow.AddDays(-1),
