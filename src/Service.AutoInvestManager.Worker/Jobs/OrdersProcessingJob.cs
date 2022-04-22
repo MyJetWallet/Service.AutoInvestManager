@@ -137,26 +137,28 @@ namespace Service.AutoInvestManager.Worker.Jobs
                         Price = quote.Data.Price,
                         RelatedRecurringBuyId = order.InvestInstructionId,
                     });
-
-                    order.QuoteId = quoteResult.Data.OperationId;
                     
-                    if (quoteResult.QuoteExecutionResult == QuoteExecutionResult.Success)
+                    switch (quoteResult.QuoteExecutionResult)
                     {
-                        order.ExecutionTime = DateTime.UtcNow;
-                        order.Price = quoteResult.Data.Price;
-                        order.ToAmount = quote.Data.ToAssetVolume;
-                        order.FeeAmount = quote.Data.FeeAmount;
-                        order.FeeCoef = quote.Data.FeeCoef;
-                        order.FeeAsset = quote.Data.FeeAsset;
-                        order.Status = OrderStatus.Executed;
-                        await UpdateAvgPrice(order);
+                        case QuoteExecutionResult.Success:
+                            order.QuoteId = quoteResult.Data.OperationId;
+                            order.ExecutionTime = DateTime.UtcNow;
+                            order.Price = quoteResult.Data.Price;
+                            order.ToAmount = quote.Data.ToAssetVolume;
+                            order.FeeAmount = quote.Data.FeeAmount;
+                            order.FeeCoef = quote.Data.FeeCoef;
+                            order.FeeAsset = quote.Data.FeeAsset;
+                            order.Status = OrderStatus.Executed;
+                            await UpdateAvgPrice(order);
+                            break;
+                        case QuoteExecutionResult.Error:
+                        case QuoteExecutionResult.ReQuote:
+                            order.Status = OrderStatus.Failed;
+                            order.ErrorText = quoteResult.ErrorMessage;
+                            await SetInstructionAsFailed(order);
+                            break;
                     }
-                    if (quoteResult.QuoteExecutionResult == QuoteExecutionResult.Error || quoteResult.QuoteExecutionResult == QuoteExecutionResult.ReQuote)
-                    {
-                        order.Status = OrderStatus.Failed;
-                        order.ErrorText = quoteResult.ErrorMessage;
-                        await SetInstructionAsFailed(order);
-                    }
+
                     await _repository.UpsertOrders(order);
                     _logger.LogInformation("Executed order {orderId} with result {quoteResul}", order.Id, quoteResult.ToJson());
                 }
