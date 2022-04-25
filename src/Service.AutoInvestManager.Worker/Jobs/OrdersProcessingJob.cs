@@ -239,7 +239,7 @@ namespace Service.AutoInvestManager.Worker.Jobs
         }
         private static bool IsExpired(InvestInstruction instruction)
         {
-            return instruction.LastExecutionTime < DateTime.UtcNow.AddMinutes(-3);
+            //return instruction.LastExecutionTime < DateTime.UtcNow.AddMinutes(-3);
             return instruction.ScheduleType switch
             {
                 ScheduleType.Daily => instruction.LastExecutionTime < DateTime.UtcNow.AddDays(-1),
