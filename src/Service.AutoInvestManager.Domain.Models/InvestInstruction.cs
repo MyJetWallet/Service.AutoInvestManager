@@ -30,6 +30,7 @@ namespace Service.AutoInvestManager.Domain.Models
         [DataMember(Order = 19)]public decimal TotalFromAmount { get; set; }
         [DataMember(Order = 20)]public decimal TotalToAmount { get; set; }
         [DataMember(Order = 21)]public decimal AvgPrice { get; set; }
+        [DataMember(Order = 22)]public decimal LastToAmount { get; set; }
     }
     
 }

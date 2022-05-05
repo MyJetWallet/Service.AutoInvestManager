@@ -75,9 +75,6 @@ namespace Service.AutoInvestManager.Worker.Jobs
                     _logger.LogInformation("Created order {order} based on instruction {instructionId}", order.ToJson(), instruction.Id);
                     
                     instruction.LastExecutionTime = DateTime.UtcNow;
-                    instruction.TotalFromAmount += order.FromAmount;
-                    instruction.TotalToAmount += order.ToAmount;
-                    
                     instruction.ShouldSendFailEmail = false;
                     instruction.ErrorText = String.Empty;
                     instruction.FailureTime = DateTime.MinValue;
@@ -119,7 +116,7 @@ namespace Service.AutoInvestManager.Worker.Jobs
                         order.Status = OrderStatus.Failed;
                         order.ErrorText = quote.ErrorMessage;
                         await _repository.UpsertOrders(order);
-                        await SetInstructionAsFailed(order);
+                        await UpdateInstructionFailed(order);
                         continue;
                     }
                     
@@ -149,13 +146,13 @@ namespace Service.AutoInvestManager.Worker.Jobs
                             order.FeeCoef = quote.Data.FeeCoef;
                             order.FeeAsset = quote.Data.FeeAsset;
                             order.Status = OrderStatus.Executed;
-                            await UpdateAvgPrice(order);
+                            await UpdateInstructionSuccess(order);
                             break;
                         case QuoteExecutionResult.Error:
                         case QuoteExecutionResult.ReQuote:
                             order.Status = OrderStatus.Failed;
                             order.ErrorText = quoteResult.ErrorMessage;
-                            await SetInstructionAsFailed(order);
+                            await UpdateInstructionFailed(order);
                             break;
                     }
 
@@ -171,7 +168,7 @@ namespace Service.AutoInvestManager.Worker.Jobs
             }
             
             //locals
-            async Task SetInstructionAsFailed(InvestOrder order)
+            async Task UpdateInstructionFailed(InvestOrder order)
             {
                 var instruction = await _repository.GetInstructionById(order.InvestInstructionId);
                 
@@ -183,10 +180,15 @@ namespace Service.AutoInvestManager.Worker.Jobs
                 await _repository.UpsertInstructions(instruction);
             }
             
-            async Task UpdateAvgPrice(InvestOrder order)
+            async Task UpdateInstructionSuccess(InvestOrder order)
             {
                 var instruction = await _repository.GetInstructionById(order.InvestInstructionId);
+                
                 instruction.AvgPrice = (instruction.AvgPrice + order.Price)/2;
+                instruction.TotalFromAmount += order.FromAmount;
+                instruction.TotalToAmount += order.ToAmount;
+                instruction.LastToAmount = order.ToAmount;
+                
                 await _repository.UpsertInstructions(instruction);
             }
         }
@@ -198,7 +200,7 @@ namespace Service.AutoInvestManager.Worker.Jobs
                 if(DateTime.UtcNow.Hour != 12)
                     return;
                 
-                var instructions = await _repository.GetInstructionsByStatus(InstructionStatus.Paused);
+                var instructions = await _repository.GetInstructionsByStatus(InstructionStatus.Active);
                 foreach (var instruction in instructions.Where(t=>t.ShouldSendFailEmail))
                 {
                     if (instruction.FailureTime.Day != DateTime.UtcNow.Day)
