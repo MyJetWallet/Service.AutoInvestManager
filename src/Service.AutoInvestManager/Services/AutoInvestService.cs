@@ -57,7 +57,10 @@ namespace Service.AutoInvestManager.Services
                 CreationTime = DateTime.UtcNow,
                 LastExecutionTime = quoteResponse.Quote.OpenDate,
                 ShouldSendFailEmail = false,
-                OriginalQuoteId = request.QuoteId
+                OriginalQuoteId = request.QuoteId,
+                LastToAmount = quoteResponse.Quote.ToAssetVolume,
+                TotalToAmount = quoteResponse.Quote.ToAssetVolume,
+                TotalFromAmount = quoteResponse.Quote.FromAssetVolume,
             };
         }
 
