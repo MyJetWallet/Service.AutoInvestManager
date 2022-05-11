@@ -6,6 +6,7 @@ using Service.AutoInvestManager.Domain.Models;
 using Service.AutoInvestManager.Domain.Models.NoSql;
 using Service.AutoInvestManager.Worker.Jobs;
 using Service.EmailSender.Client;
+using Service.GroupManager.Client;
 using Service.Liquidity.Converter.Client;
 using Service.Liquidity.Converter.Grpc;
 using Service.PersonalData.Client;
@@ -21,7 +22,7 @@ namespace Service.AutoInvestManager.Worker.Modules
   
             builder.RegisterLiquidityConverterClient(Program.Settings.LiquidityConverterGrpcServiceUrl);
             builder.RegisterPersonalDataClient(Program.Settings.PersonalDataServiceUrl);
-
+            builder.RegisterGroupManagerClient(Program.Settings.GroupManagerGrpcServiceUrl);
             var serviceBusClient = builder.RegisterMyServiceBusTcpClient(()=>Program.Settings.SpotServiceBusHostPort, Program.LogFactory);
             builder.RegisterMyServiceBusPublisher<InvestOrder>(serviceBusClient, InvestOrder.TopicName, true);
             

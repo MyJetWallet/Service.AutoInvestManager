@@ -10,6 +10,8 @@ using Service.AutoInvestManager.Domain.Helpers;
 using Service.AutoInvestManager.Domain.Models;
 using Service.EmailSender.Grpc;
 using Service.EmailSender.Grpc.Models;
+using Service.GroupManager.Grpc;
+using Service.GroupManager.Grpc.Models;
 using Service.Liquidity.Converter.Domain.Models;
 using Service.Liquidity.Converter.Grpc;
 using Service.Liquidity.Converter.Grpc.Models;
@@ -27,8 +29,9 @@ namespace Service.AutoInvestManager.Worker.Jobs
         private readonly IServiceBusPublisher<InvestOrder> _publisher;
         private readonly IEmailSenderService _emailSender;
         private readonly IPersonalDataServiceGrpc _personalData;
-        
-        public OrdersProcessingJob(ILogger<OrdersProcessingJob> logger, InstructionsRepository repository, IQuoteService quoteService, IServiceBusPublisher<InvestOrder> publisher, IEmailSenderService emailSender, IPersonalDataServiceGrpc personalData)
+        private readonly IGroupsService _groupsService;
+
+        public OrdersProcessingJob(ILogger<OrdersProcessingJob> logger, InstructionsRepository repository, IQuoteService quoteService, IServiceBusPublisher<InvestOrder> publisher, IEmailSenderService emailSender, IPersonalDataServiceGrpc personalData, IGroupsService groupsService)
         {
             _logger = logger;
             _repository = repository;
@@ -36,6 +39,7 @@ namespace Service.AutoInvestManager.Worker.Jobs
             _publisher = publisher;
             _emailSender = emailSender;
             _personalData = personalData;
+            _groupsService = groupsService;
             _timer = new MyTaskTimer(typeof(OrdersProcessingJob), TimeSpan.FromSeconds(Program.Settings.TimerPeriodInSeconds), logger, DoTime);
         }
 
@@ -98,6 +102,11 @@ namespace Service.AutoInvestManager.Worker.Jobs
                 
                 foreach (var order in orders)
                 {
+                    var group = await _groupsService.GetOrCreateClientProfileWithGroup(new GetOrClientProfileRequest()
+                    {
+                        ClientId = order.ClientId
+                    });
+                    
                     var quote = await _quoteService.GetQuoteAsync(new GetQuoteRequest
                     {
                         FromAsset = order.FromAsset,
@@ -109,8 +118,10 @@ namespace Service.AutoInvestManager.Worker.Jobs
                         AccountId = order.ClientId,
                         WalletId = order.WalletId,
                         QuoteType = QuoteType.AutoInvest,
-                        RecurringBuy = null
+                        RecurringBuy = null,
+                        ProfileId = group.Group.ConverterProfileId
                     });
+                    
                     if (!quote.IsSuccess)
                     {
                         order.Status = OrderStatus.Failed;

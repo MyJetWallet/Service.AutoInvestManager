@@ -37,5 +37,8 @@ namespace Service.AutoInvestManager.Worker.Settings
                 
         [YamlProperty("AutoInvestManager.PersonalDataGrpcServiceUrl")]
         public string PersonalDataServiceUrl { get; set; }
+        
+        [YamlProperty("AutoInvestManager.GroupManagerGrpcServiceUrl")]
+        public string GroupManagerGrpcServiceUrl { get; set; }
     }
 }

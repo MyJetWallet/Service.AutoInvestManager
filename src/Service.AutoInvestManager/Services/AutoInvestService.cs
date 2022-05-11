@@ -36,7 +36,6 @@ namespace Service.AutoInvestManager.Services
             {
                 QuoteId = request.QuoteId
             });
-            var t = _quoteService.GetQuoteAsync(new GetQuoteRequest());
             if (!quoteResponse.Success)
                 throw new Exception("Quote not found");
 
