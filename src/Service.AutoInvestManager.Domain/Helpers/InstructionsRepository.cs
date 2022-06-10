@@ -36,7 +36,7 @@ namespace Service.AutoInvestManager.Domain.Helpers
         {
             await using var context = new DatabaseContext(_dbContextOptionsBuilder.Options);
             await context.UpsertAsync(instructions);
-            await _writer.BulkInsertOrReplaceAsync(instructions.Where(t=>t.Status != InstructionStatus.Deleted).Select(InvestInstructionNoSqlEntity.Create));
+            await _writer.BulkInsertOrReplaceAsync(instructions.Where(t=>t.Status != InstructionStatus.Deleted).Select(InvestInstructionNoSqlEntity.Create).ToList());
             foreach (var instruction in instructions.Where(t=>t.Status == InstructionStatus.Deleted))
             {
                 await _writer.DeleteAsync(InvestInstructionNoSqlEntity.GeneratePartitionKey(instruction.ClientId),InvestInstructionNoSqlEntity.GenerateRowKey(instruction.Id));
