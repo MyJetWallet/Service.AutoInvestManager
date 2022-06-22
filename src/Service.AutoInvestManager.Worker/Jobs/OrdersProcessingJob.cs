@@ -126,6 +126,7 @@ namespace Service.AutoInvestManager.Worker.Jobs
                     {
                         order.Status = OrderStatus.Failed;
                         order.ErrorText = quote.ErrorMessage;
+                        order.ErrorCode = GetErrorCode(quote.ErrorMessage);
                         await _repository.UpsertOrders(order);
                         await UpdateInstructionFailed(order);
                         continue;
@@ -163,6 +164,7 @@ namespace Service.AutoInvestManager.Worker.Jobs
                         case QuoteExecutionResult.ReQuote:
                             order.Status = OrderStatus.Failed;
                             order.ErrorText = quoteResult.ErrorMessage;
+                            order.ErrorCode = GetErrorCode(quoteResult.ErrorMessage);
                             await UpdateInstructionFailed(order);
                             break;
                     }
@@ -203,7 +205,19 @@ namespace Service.AutoInvestManager.Worker.Jobs
                 await _repository.UpsertInstructions(instruction);
             }
         }
-        
+
+        private ErrorCode GetErrorCode(string quoteErrorMessage)
+        {
+            if (string.IsNullOrWhiteSpace(quoteErrorMessage))
+                return ErrorCode.NoError;
+            if (quoteErrorMessage.Contains("Asset pair do not supported"))
+                return ErrorCode.PairNotSupported;
+            if (quoteErrorMessage.Contains("Not enough balance"))
+                return ErrorCode.LowBalance;
+
+            return ErrorCode.InternalServerError;
+        }
+
         private async Task SendFailureEmails()
         {
             try

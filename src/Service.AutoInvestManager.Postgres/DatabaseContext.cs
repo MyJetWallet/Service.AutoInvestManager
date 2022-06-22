@@ -85,7 +85,8 @@ namespace Service.AutoInvestManager.Postgres
             modelBuilder.Entity<InvestOrder>().Property(e => e.Status);
             modelBuilder.Entity<InvestOrder>().Property(e => e.Price);
             modelBuilder.Entity<InvestOrder>().Property(e => e.ExecutionTime).HasDefaultValue(DateTime.MinValue);
-            
+            modelBuilder.Entity<InvestOrder>().Property(e => e.ErrorCode).HasDefaultValue(ErrorCode.NoError);
+
             modelBuilder.Entity<InvestOrder>().HasIndex(e => e.ClientId);
             modelBuilder.Entity<InvestOrder>().HasIndex(e => e.Status);
 

@@ -32,6 +32,7 @@ namespace Service.AutoInvestManager.Domain.Models
         [DataMember(Order = 17)]public string FeeAsset { get; set; }
         [DataMember(Order = 18)]public decimal FeeCoef { get; set; }
         [DataMember(Order = 19)]public ScheduleType ScheduleType { get; set; }
+        [DataMember(Order = 20)]public ErrorCode ErrorCode { get; set; }
 
 
     }
